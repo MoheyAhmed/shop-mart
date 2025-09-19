@@ -1,48 +1,53 @@
-# ShopMart - E-commerce Website
+# ShopMart - E-commerce Platform
 
-A modern, responsive e-commerce website built with Next.js, React, and Tailwind CSS. This project replicates the functionality and design of a professional online shopping platform.
+A modern, responsive e-commerce platform built with Next.js 15, TypeScript, and Tailwind CSS.
 
 ## 🚀 Features
 
-- **Modern UI/UX**: Clean, responsive design with smooth animations
-- **Product Catalog**: Browse products with filtering, sorting, and search
-- **Shopping Cart**: Add/remove items, update quantities, and view totals
-- **Product Details**: Detailed product pages with image galleries
-- **Categories**: Organized product categories with dedicated pages
-- **Responsive Design**: Works perfectly on desktop, tablet, and mobile
-- **API Integration**: Uses DummyJSON API for product data
-- **State Management**: Context API for cart state management
-- **Loading States**: Skeleton loaders and loading spinners
-
-## 🛠️ Tech Stack
-
-- **Frontend**: Next.js 15, React 19
-- **Styling**: Tailwind CSS 4
-- **State Management**: React Context API
-- **API**: DummyJSON (https://dummyjson.com/)
-- **Icons**: Heroicons (SVG)
-- **Images**: Next.js Image component with optimization
+- **Modern Tech Stack**: Next.js 15, TypeScript, Tailwind CSS
+- **Responsive Design**: Mobile-first approach with beautiful UI
+- **Product Management**: Browse products, categories, and brands
+- **Shopping Cart**: Add, remove, and manage cart items
+- **User Authentication**: Login, signup, and user management
+- **API Integration**: Real-time data from ecommerce.routemisr.com
+- **Type Safety**: Full TypeScript implementation
+- **Performance**: Optimized with Next.js features
 
 ## 📁 Project Structure
 
 ```
 src/
-├── app/                    # Next.js App Router
-│   ├── cart/              # Shopping cart page
-│   ├── categories/        # Product categories page
-│   ├── products/          # Products listing and details
-│   │   └── [id]/         # Dynamic product detail pages
+├── app/                    # Next.js App Router pages
+│   ├── page.tsx           # Home page
+│   ├── layout.tsx         # Root layout
 │   ├── globals.css        # Global styles
-│   ├── layout.js          # Root layout
-│   └── page.js            # Home page
+│   ├── categories/        # Categories page
+│   ├── brands/           # Brands page
+│   └── products/         # Products pages
+│       ├── page.tsx      # Products listing
+│       └── [id]/         # Product detail page
 ├── components/            # Reusable components
-│   ├── Header.js          # Navigation header
-│   ├── Footer.js          # Site footer
-│   ├── ProductCard.js     # Product card component
-│   └── LoadingSpinner.js  # Loading component
-└── context/               # React Context
-    └── CartContext.js     # Shopping cart state management
+│   ├── Header.tsx        # Navigation header
+│   ├── Footer.tsx        # Site footer
+│   └── ProductCard.tsx   # Product card component
+├── context/              # React Context providers
+│   ├── AuthContext.tsx   # Authentication context
+│   └── CartContext.tsx   # Shopping cart context
+├── config/               # Configuration files
+│   └── api.ts           # API configuration and functions
+└── types/               # TypeScript type definitions
+    └── api.ts           # API response types
 ```
+
+## 🛠️ Tech Stack
+
+- **Framework**: Next.js 15
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **State Management**: React Context API
+- **API**: RESTful API integration
+- **Icons**: Heroicons (SVG)
+- **Images**: Next.js Image component
 
 ## 🚀 Getting Started
 
@@ -62,153 +67,138 @@ cd shop-mart
 2. Install dependencies:
 ```bash
 npm install
+# or
+yarn install
 ```
 
 3. Run the development server:
 ```bash
 npm run dev
+# or
+yarn dev
 ```
 
 4. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## 📱 Pages & Features
+## 📱 Pages
 
 ### Home Page (`/`)
 - Hero section with call-to-action
 - Featured products showcase
-- Service highlights (Free shipping, Quality guarantee, 24/7 support)
+- Features section
 - Newsletter subscription
 
 ### Products Page (`/products`)
-- Product grid with filtering and sorting
+- Product listing with filters
 - Search functionality
-- Category filtering
 - Pagination
-- Responsive grid layout
-
-### Product Details (`/products/[id]`)
-- Detailed product information
-- Image gallery with thumbnails
-- Add to cart functionality
-- Quantity selector
-- Related products
-- Product specifications
+- Category and brand filters
+- Price range filtering
+- Sorting options
 
 ### Categories Page (`/categories`)
-- Category grid with images
-- Product count per category
+- Category grid display
+- Category images and names
 - Direct links to filtered products
 
-### Shopping Cart (`/cart`)
-- Cart items management
-- Quantity updates
-- Remove items
-- Order summary with totals
-- Promo code input
-- Checkout button
+### Brands Page (`/brands`)
+- Brand grid with logos
+- Pagination support
+- Brand information
 
-## 🎨 Design Features
-
-- **Responsive Grid**: Adapts to different screen sizes
-- **Hover Effects**: Smooth transitions and hover states
-- **Loading States**: Skeleton loaders for better UX
-- **Image Optimization**: Next.js Image component with lazy loading
-- **Custom Scrollbar**: Styled scrollbars for better aesthetics
-- **Smooth Scrolling**: Enhanced navigation experience
-
-## 🛒 Shopping Cart Features
-
-- Add/remove products
-- Update quantities
-- Persistent storage (localStorage)
-- Real-time total calculation
-- Cart item counter in header
-- Clear cart functionality
+### Product Detail Page (`/products/[id]`)
+- Detailed product information
+- Image gallery
+- Price and discount display
+- Add to cart functionality
+- Product specifications
 
 ## 🔧 API Integration
 
-The project uses the DummyJSON API for product data:
-- Products: `https://dummyjson.com/products`
-- Categories: `https://dummyjson.com/products/categories`
-- Single Product: `https://dummyjson.com/products/{id}`
+The application integrates with the ecommerce.routemisr.com API:
 
-## 📱 Responsive Design
+- **Categories**: `GET /api/v1/categories`
+- **Brands**: `GET /api/v1/brands`
+- **Products**: `GET /api/v1/products`
+- **Product Detail**: `GET /api/v1/products/{id}`
 
-- **Mobile First**: Optimized for mobile devices
-- **Breakpoints**: 
-  - sm: 640px
-  - md: 768px
-  - lg: 1024px
-  - xl: 1280px
-- **Grid System**: Responsive product grids
-- **Navigation**: Mobile-friendly hamburger menu
+### API Features
+
+- Real-time data fetching
+- Error handling and fallbacks
+- Loading states
+- Type-safe API responses
+- Authentication support
+
+## 🎨 Design Features
+
+- **Responsive Design**: Works on all device sizes
+- **Modern UI**: Clean, professional interface
+- **Interactive Elements**: Hover effects and transitions
+- **Loading States**: Skeleton loaders and spinners
+- **Error Handling**: User-friendly error messages
+- **Accessibility**: Proper ARIA labels and keyboard navigation
+
+## 🔐 Authentication
+
+- User login and registration
+- Token-based authentication
+- Protected routes
+- User context management
+- Automatic token validation
+
+## 🛒 Shopping Cart
+
+- Add/remove products
+- Quantity management
+- Price calculations
+- Persistent cart state
+- Cart item count display
+
+## 📦 TypeScript
+
+Full TypeScript implementation with:
+
+- Strict type checking
+- Interface definitions for all data structures
+- Type-safe API calls
+- Component prop types
+- Context type definitions
 
 ## 🚀 Deployment
 
-The project can be deployed to various platforms:
+The application is ready for deployment on:
 
-### Vercel (Recommended)
+- Vercel (recommended)
+- Netlify
+- Any Node.js hosting platform
+
+### Build for Production
+
 ```bash
 npm run build
-# Deploy to Vercel
+npm start
 ```
-
-### Netlify
-```bash
-npm run build
-npm run export
-# Deploy dist folder to Netlify
-```
-
-### Docker
-```dockerfile
-FROM node:18-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm install
-COPY . .
-RUN npm run build
-EXPOSE 3000
-CMD ["npm", "start"]
-```
-
-## 🎯 Future Enhancements
-
-- [ ] User authentication and profiles
-- [ ] Wishlist functionality
-- [ ] Product reviews and ratings
-- [ ] Payment integration (Stripe)
-- [ ] Order history
-- [ ] Admin dashboard
-- [ ] Product search with filters
-- [ ] Dark mode toggle
-- [ ] Multi-language support
-- [ ] PWA features
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.
 
 ## 🙏 Acknowledgments
 
-- [DummyJSON](https://dummyjson.com/) for providing the API
+- [Next.js](https://nextjs.org/) for the amazing React framework
 - [Tailwind CSS](https://tailwindcss.com/) for the utility-first CSS framework
-- [Next.js](https://nextjs.org/) for the React framework
 - [Heroicons](https://heroicons.com/) for the beautiful icons
-- [Unsplash](https://unsplash.com/) for the placeholder images
-
-## 📞 Support
-
-If you have any questions or need help, please open an issue in the repository.
+- [ecommerce.routemisr.com](https://ecommerce.routemisr.com/) for the API data
 
 ---
 
-**Happy Shopping! 🛍️**
+Built with ❤️ using Next.js and TypeScript

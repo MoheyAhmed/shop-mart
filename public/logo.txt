@@ -1,0 +1,7 @@
+ShopMart Logo
+=============
+
+This is a placeholder for the ShopMart logo.
+The actual logo should be a PNG or SVG file.
+
+For now, the header uses text-based branding.

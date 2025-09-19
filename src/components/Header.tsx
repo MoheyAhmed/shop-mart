@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useCart } from '../context/CartContext';
+import { useCart } from '@/context/CartContext';
 
-export default function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+export default function Header(): JSX.Element {
+  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const { getTotalItems } = useCart();
 
   return (
@@ -30,8 +30,8 @@ export default function Header() {
             <Link href="/categories" className="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium">
               Categories
             </Link>
-            <Link href="/about" className="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium">
-              About
+            <Link href="/brands" className="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium">
+              Brands
             </Link>
           </nav>
 
@@ -93,8 +93,8 @@ export default function Header() {
               <Link href="/categories" className="text-gray-700 hover:text-blue-600 block px-3 py-2 text-base font-medium">
                 Categories
               </Link>
-              <Link href="/about" className="text-gray-700 hover:text-blue-600 block px-3 py-2 text-base font-medium">
-                About
+              <Link href="/brands" className="text-gray-700 hover:text-blue-600 block px-3 py-2 text-base font-medium">
+                Brands
               </Link>
               
               {/* Mobile Search */}
