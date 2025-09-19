@@ -9,7 +9,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 export default function CartPage() {
-  const { items, loading, error, removeFromCart, updateQuantity, clearCart } = useCart();
+  const { items, loading, error, removeFromCart, updateQuantity, clearCart, cartId } = useCart();
   const { user } = useAuth();
   const [showCheckout, setShowCheckout] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
@@ -48,13 +48,28 @@ export default function CartPage() {
   };
 
   const handleCheckout = async (paymentMethod: 'cash' | 'card') => {
-    if (!user?._id) return;
+    // Get cartId from state or localStorage
+    const currentCartId = cartId || localStorage.getItem('cartId');
+    const currentCartOwner = localStorage.getItem('cartOwner');
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.log('handleCheckout - cartId from state:', cartId);
+      console.log('handleCheckout - cartId from localStorage:', localStorage.getItem('cartId'));
+      console.log('handleCheckout - currentCartId:', currentCartId);
+      console.log('handleCheckout - currentCartOwner:', currentCartOwner);
+      console.log('handleCheckout - items:', items);
+    }
+    
+    if (!currentCartId) {
+      alert('Cart not found. Please try again.');
+      return;
+    }
 
     setCheckoutLoading(true);
     try {
       if (paymentMethod === 'cash') {
         // Create cash order
-        const response = await api.createCashOrder(user._id, shippingAddress);
+        const response = await api.createCashOrder(currentCartId, shippingAddress);
         if (process.env.NODE_ENV === 'development') {
           console.log('Cash order response:', response);
         }
@@ -68,7 +83,7 @@ export default function CartPage() {
         }
       } else {
         // Create checkout session for card payment
-        const response = await api.createCheckoutSession(user._id, shippingAddress);
+        const response = await api.createCheckoutSession(currentCartId, shippingAddress);
         if (process.env.NODE_ENV === 'development') {
           console.log('Checkout session response:', response);
         }
@@ -218,12 +233,7 @@ export default function CartPage() {
                   
                   <div className="mt-6 pt-6 border-t border-gray-200">
                     <button
-                      onClick={() => {
-                        if (process.env.NODE_ENV === 'development') {
-                          console.log('Clear Cart button clicked');
-                        }
-                        clearCart();
-                      }}
+                      onClick={clearCart}
                       className="text-red-600 hover:text-red-700 font-medium"
                     >
                       Clear Cart

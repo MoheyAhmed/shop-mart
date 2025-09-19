@@ -16,6 +16,7 @@ interface CartState {
   items: CartItem[];
   loading: boolean;
   error: string | null;
+  cartId: string | null;
 }
 
 // Cart Actions Type
@@ -56,9 +57,15 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
       };
 
     case 'LOAD_CART_SUCCESS':
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Reducer - LOAD_CART_SUCCESS payload:', action.payload);
+        console.log('Reducer - Items:', action.payload?.items || action.payload || []);
+        console.log('Reducer - CartId:', action.payload?.cartId);
+      }
       return {
         ...state,
-        items: action.payload || [],
+        items: action.payload?.items || action.payload || [],
+        cartId: action.payload?.cartId || null,
         loading: false,
         error: null,
       };
@@ -88,13 +95,13 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
       };
 
     case 'CLEAR_CART_SUCCESS':
-      if (process.env.NODE_ENV === 'development') {
-        console.log('Reducer - CLEAR_CART_SUCCESS case executed');
-        console.log('Reducer - Previous state:', state);
-      }
+      // Clear cartId and cartOwner from localStorage
+      localStorage.removeItem('cartId');
+      localStorage.removeItem('cartOwner');
       return {
         ...state,
         items: [],
+        cartId: null,
         loading: false,
         error: null,
       };
@@ -113,6 +120,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     items: [],
     loading: false,
     error: null,
+    cartId: null,
   });
 
   // Helper function to transform cart items from API response
@@ -151,22 +159,47 @@ export const CartProvider = ({ children }: CartProviderProps) => {
   }, []);
 
   const loadCart = async (): Promise<void> => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('loadCart - Starting to load cart');
+    }
     dispatch({ type: 'SET_LOADING', payload: true });
     try {
       const response = await api.getCart();
       if (process.env.NODE_ENV === 'development') {
-        console.log('loadCart - Full response:', response);
-        console.log('loadCart - Data:', (response as any).data);
-        console.log('loadCart - Products:', (response as any).data?.products);
+        console.log('loadCart - API response received:', response);
       }
       if ((response as any).status === 'success') {
         const cartItems = transformCartItems((response as any).data.products || []);
+        const cartId = (response as any).data?._id || (response as any).cartId;
         if (process.env.NODE_ENV === 'development') {
-          console.log('loadCart - Transformed items:', cartItems);
+          console.log('loadCart - Cart ID from response:', cartId);
+          console.log('loadCart - Data object:', (response as any).data);
+          console.log('loadCart - About to dispatch LOAD_CART_SUCCESS');
         }
-        dispatch({ type: 'LOAD_CART_SUCCESS', payload: cartItems });
+        dispatch({ type: 'LOAD_CART_SUCCESS', payload: { items: cartItems, cartId } });
+        
+        // Store cartId and cartOwner in localStorage
+        if (cartId) {
+          localStorage.setItem('cartId', cartId);
+        }
+        if ((response as any).data?.cartOwner) {
+          localStorage.setItem('cartOwner', (response as any).data.cartOwner);
+        }
+        
+        if (process.env.NODE_ENV === 'development') {
+          console.log('loadCart - Dispatch completed');
+          console.log('loadCart - Stored cartId in localStorage:', cartId);
+          console.log('loadCart - Stored cartOwner in localStorage:', (response as any).data?.cartOwner);
+        }
+      } else {
+        if (process.env.NODE_ENV === 'development') {
+          console.log('loadCart - Response status is not success:', (response as any).status);
+        }
       }
     } catch (error) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('loadCart - Error occurred:', error);
+      }
       // Don't show error for authentication issues - just clear the cart
       if (error instanceof Error && error.message.includes('Authentication required')) {
         dispatch({ type: 'LOAD_CART_SUCCESS', payload: [] });
@@ -276,19 +309,9 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     dispatch({ type: 'SET_LOADING', payload: true });
     try {
       const response = await api.clearCart();
-      if (process.env.NODE_ENV === 'development') {
-        console.log('clearCart - API response:', response);
-      }
       if ((response as any).status === 'success' || (response as any).message === 'success') {
-        if (process.env.NODE_ENV === 'development') {
-          console.log('clearCart - Clearing cart state directly');
-          console.log('clearCart - Current state before dispatch:', state);
-        }
         // Clear the cart state directly since the API call was successful
         dispatch({ type: 'CLEAR_CART_SUCCESS' });
-        if (process.env.NODE_ENV === 'development') {
-          console.log('clearCart - Dispatch completed');
-        }
         return { success: true };
       } else {
         throw new Error((response as any).message || 'Failed to clear cart');
