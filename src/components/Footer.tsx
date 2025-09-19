@@ -94,21 +94,19 @@ export default function Footer(): JSX.Element {
             </ul>
           </div>
 
-          {/* Newsletter */}
+          {/* Contact Info */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Newsletter</h3>
-            <p className="text-gray-400">
-              Subscribe to get updates on new products and exclusive offers.
-            </p>
-            <div className="flex">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-400"
-              />
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-r-lg hover:bg-blue-700 transition-colors">
-                Subscribe
-              </button>
+            <h3 className="text-lg font-semibold">Contact Info</h3>
+            <div className="space-y-2">
+              <p className="text-gray-400">
+                📧 info@shopmart.com
+              </p>
+              <p className="text-gray-400">
+                📞 +1 (555) 123-4567
+              </p>
+              <p className="text-gray-400">
+                🏠 123 Shopping Street, City, Country
+              </p>
             </div>
           </div>
         </div>

@@ -104,12 +104,28 @@ interface CartProviderProps {
   children: ReactNode;
 }
 
-export const CartProvider = ({ children }: CartProviderProps): JSX.Element => {
+export const CartProvider = ({ children }: CartProviderProps) => {
   const [state, dispatch] = useReducer(cartReducer, {
     items: [],
     loading: false,
     error: null,
   });
+
+  // Helper function to transform cart items from API response
+  const transformCartItems = (products: any[]) => {
+    return products.map((cartItem: any) => ({
+      _id: cartItem._id,
+      count: Number(cartItem.count),
+      price: Number(cartItem.price),
+      title: cartItem.product.title,
+      imageCover: cartItem.product.imageCover,
+      brand: cartItem.product.brand,
+      category: cartItem.product.category,
+      quantity: Number(cartItem.product.quantity),
+      ratingsAverage: Number(cartItem.product.ratingsAverage),
+      priceAfterDiscount: Number(cartItem.product.priceAfterDiscount || cartItem.price),
+    }));
+  };
 
   // Load cart from API on mount only if user is authenticated
   useEffect(() => {
@@ -123,8 +139,9 @@ export const CartProvider = ({ children }: CartProviderProps): JSX.Element => {
     dispatch({ type: 'SET_LOADING', payload: true });
     try {
       const response = await api.getCart();
-      if (response.status === 'success') {
-        dispatch({ type: 'LOAD_CART_SUCCESS', payload: response.data.products });
+      if ((response as any).status === 'success') {
+        const cartItems = transformCartItems((response as any).data.products);
+        dispatch({ type: 'LOAD_CART_SUCCESS', payload: cartItems });
       }
     } catch (error) {
       // Don't show error for authentication issues - just clear the cart
@@ -139,16 +156,34 @@ export const CartProvider = ({ children }: CartProviderProps): JSX.Element => {
   const addToCart = async (product: Product): Promise<{ success: boolean; error?: string }> => {
     dispatch({ type: 'SET_LOADING', payload: true });
     try {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Adding to cart, product ID:', product._id);
+        console.log('Token in localStorage:', localStorage.getItem('token'));
+      }
+      
       const response = await api.addToCart(product._id);
-      if (response.status === 'success') {
-        dispatch({ type: 'ADD_TO_CART_SUCCESS', payload: response.data.products });
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Add to cart response:', response);
+      }
+      
+      if ((response as any).status === 'success') {
+        const cartItems = transformCartItems((response as any).data.products);
+        dispatch({ type: 'ADD_TO_CART_SUCCESS', payload: cartItems });
         return { success: true };
       } else {
-        throw new Error(response.message || 'Failed to add to cart');
+        throw new Error((response as any).message || 'Failed to add to cart');
       }
     } catch (error) {
+      console.error('Add to cart error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to add to cart';
-      dispatch({ type: 'SET_ERROR', payload: errorMessage });
+      
+      // If authentication error, clear the cart state
+      if (errorMessage.includes('Authentication required')) {
+        dispatch({ type: 'LOAD_CART_SUCCESS', payload: [] });
+      } else {
+        dispatch({ type: 'SET_ERROR', payload: errorMessage });
+      }
+      
       return { success: false, error: errorMessage };
     }
   };
@@ -157,15 +192,23 @@ export const CartProvider = ({ children }: CartProviderProps): JSX.Element => {
     dispatch({ type: 'SET_LOADING', payload: true });
     try {
       const response = await api.removeFromCart(productId);
-      if (response.status === 'success') {
-        dispatch({ type: 'REMOVE_FROM_CART_SUCCESS', payload: response.data.products });
+      if ((response as any).status === 'success') {
+        const cartItems = transformCartItems((response as any).data.products);
+        dispatch({ type: 'REMOVE_FROM_CART_SUCCESS', payload: cartItems });
         return { success: true };
       } else {
-        throw new Error(response.message || 'Failed to remove from cart');
+        throw new Error((response as any).message || 'Failed to remove from cart');
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to remove from cart';
-      dispatch({ type: 'SET_ERROR', payload: errorMessage });
+      
+      // If authentication error, clear the cart state
+      if (errorMessage.includes('Authentication required')) {
+        dispatch({ type: 'LOAD_CART_SUCCESS', payload: [] });
+      } else {
+        dispatch({ type: 'SET_ERROR', payload: errorMessage });
+      }
+      
       return { success: false, error: errorMessage };
     }
   };
@@ -178,15 +221,23 @@ export const CartProvider = ({ children }: CartProviderProps): JSX.Element => {
     dispatch({ type: 'SET_LOADING', payload: true });
     try {
       const response = await api.updateCartItem(productId, quantity);
-      if (response.status === 'success') {
-        dispatch({ type: 'UPDATE_QUANTITY_SUCCESS', payload: response.data.products });
+      if ((response as any).status === 'success') {
+        const cartItems = transformCartItems((response as any).data.products);
+        dispatch({ type: 'UPDATE_QUANTITY_SUCCESS', payload: cartItems });
         return { success: true };
       } else {
-        throw new Error(response.message || 'Failed to update quantity');
+        throw new Error((response as any).message || 'Failed to update quantity');
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to update quantity';
-      dispatch({ type: 'SET_ERROR', payload: errorMessage });
+      
+      // If authentication error, clear the cart state
+      if (errorMessage.includes('Authentication required')) {
+        dispatch({ type: 'LOAD_CART_SUCCESS', payload: [] });
+      } else {
+        dispatch({ type: 'SET_ERROR', payload: errorMessage });
+      }
+      
       return { success: false, error: errorMessage };
     }
   };
@@ -195,15 +246,22 @@ export const CartProvider = ({ children }: CartProviderProps): JSX.Element => {
     dispatch({ type: 'SET_LOADING', payload: true });
     try {
       const response = await api.clearCart();
-      if (response.status === 'success') {
+      if ((response as any).status === 'success') {
         dispatch({ type: 'CLEAR_CART_SUCCESS' });
         return { success: true };
       } else {
-        throw new Error(response.message || 'Failed to clear cart');
+        throw new Error((response as any).message || 'Failed to clear cart');
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to clear cart';
-      dispatch({ type: 'SET_ERROR', payload: errorMessage });
+      
+      // If authentication error, clear the cart state
+      if (errorMessage.includes('Authentication required')) {
+        dispatch({ type: 'LOAD_CART_SUCCESS', payload: [] });
+      } else {
+        dispatch({ type: 'SET_ERROR', payload: errorMessage });
+      }
+      
       return { success: false, error: errorMessage };
     }
   };

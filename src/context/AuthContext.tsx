@@ -42,6 +42,8 @@ interface AuthContextType extends AuthState {
   forgotPassword: (email: string) => Promise<{ success: boolean; message?: string; error?: string }>;
   verifyResetCode: (resetCode: string) => Promise<{ success: boolean; message?: string; error?: string }>;
   resetPassword: (email: string, newPassword: string) => Promise<{ success: boolean; message?: string; error?: string }>;
+  updateProfile: (userData: any) => Promise<{ success: boolean; message?: string; error?: string }>;
+  changePassword: (passwordData: any) => Promise<{ success: boolean; message?: string; error?: string }>;
 }
 
 // Login Credentials Type
@@ -127,44 +129,105 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
     const token = localStorage.getItem('token');
     const user = localStorage.getItem('user');
     
-    if (token && user) {
-      // Verify token with server
-      api.verifyToken()
-        .then(() => {
-          dispatch({
-            type: 'LOGIN_SUCCESS',
-            payload: {
-              token,
-              user: JSON.parse(user),
-            },
-          });
-        })
-        .catch(() => {
-          // Token is invalid, clear storage
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
-          dispatch({ type: 'LOGOUT' });
-        })
-        .finally(() => {
-          dispatch({ type: 'SET_LOADING', payload: false });
-        });
-    } else {
-      dispatch({ type: 'SET_LOADING', payload: false });
+    if (process.env.NODE_ENV === 'development') {
+      console.log('AuthContext useEffect - Token:', token);
+      console.log('AuthContext useEffect - User:', user);
+      console.log('AuthContext useEffect - Current state:', { isAuthenticated: state.isAuthenticated, loading: state.loading });
     }
+    
+    // If no token or user in localStorage, ensure we're logged out
+    if (!token || !user) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('No token or user found in localStorage - logging out');
+      }
+      dispatch({ type: 'LOGOUT' });
+      dispatch({ type: 'SET_LOADING', payload: false });
+      return;
+    }
+    
+    // Verify token with server
+    api.verifyToken()
+      .then(() => {
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Token verified successfully');
+        }
+        dispatch({
+          type: 'LOGIN_SUCCESS',
+          payload: {
+            token,
+            user: JSON.parse(user),
+          },
+        });
+      })
+      .catch((error) => {
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Token verification failed:', error);
+        }
+        // Token is invalid, clear storage
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        dispatch({ type: 'LOGOUT' });
+      })
+      .finally(() => {
+        dispatch({ type: 'SET_LOADING', payload: false });
+      });
   }, []);
+
+  // Additional check to ensure token consistency
+  useEffect(() => {
+    const checkTokenConsistency = () => {
+      const token = localStorage.getItem('token');
+      const user = localStorage.getItem('user');
+      
+      // If we think we're authenticated but no token exists, log out
+      if (state.isAuthenticated && (!token || !user)) {
+        if (process.env.NODE_ENV === 'development') {
+          console.log('AuthContext - Token inconsistency detected, logging out');
+        }
+        dispatch({ type: 'LOGOUT' });
+      }
+    };
+
+    // Check immediately
+    checkTokenConsistency();
+
+    // Set up interval to check periodically
+    const interval = setInterval(checkTokenConsistency, 5000); // Check every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [state.isAuthenticated]);
 
   const login = async (credentials: LoginCredentials): Promise<{ success: boolean; error?: string }> => {
     dispatch({ type: 'LOGIN_START' });
     
     try {
       const response = await api.signin(credentials);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Login response:', response);
+      }
       
-      if (response.status === 'success') {
-        const { token, user } = response.data;
+      if (response.message === 'success') {
+        const { token, user } = response;
+        
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Login successful, storing token and user...');
+          console.log('Token to store:', token);
+          console.log('User to store:', user);
+        }
         
         // Store in localStorage
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(user));
+        
+        // Verify storage immediately
+        const storedToken = localStorage.getItem('token');
+        const storedUser = localStorage.getItem('user');
+        
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Token stored successfully:', storedToken);
+          console.log('User stored successfully:', storedUser);
+          console.log('Token matches:', token === storedToken);
+        }
         
         dispatch({
           type: 'LOGIN_SUCCESS',
@@ -176,6 +239,7 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
         throw new Error(response.message || 'Login failed');
       }
     } catch (error) {
+      console.error('Login error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Login failed. Please try again.';
       dispatch({
         type: 'LOGIN_FAILURE',
@@ -190,13 +254,32 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
     
     try {
       const response = await api.signup(userData);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Signup response:', response);
+      }
       
-      if (response.status === 'success') {
-        const { token, user } = response.data;
+      if (response.message === 'success') {
+        const { token, user } = response;
+        
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Signup successful, storing token and user...');
+          console.log('Token to store:', token);
+          console.log('User to store:', user);
+        }
         
         // Store in localStorage
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(user));
+        
+        // Verify storage immediately
+        const storedToken = localStorage.getItem('token');
+        const storedUser = localStorage.getItem('user');
+        
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Token stored successfully:', storedToken);
+          console.log('User stored successfully:', storedUser);
+          console.log('Token matches:', token === storedToken);
+        }
         
         dispatch({
           type: 'LOGIN_SUCCESS',
@@ -208,6 +291,7 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
         throw new Error(response.message || 'Signup failed');
       }
     } catch (error) {
+      console.error('Signup error:', error);
       const errorMessage = error instanceof Error ? error.message : 'Signup failed. Please try again.';
       dispatch({
         type: 'LOGIN_FAILURE',
@@ -218,8 +302,22 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
   };
 
   const logout = (): void => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Logging out, clearing localStorage...');
+    }
+    
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    
+    // Verify cleanup
+    const token = localStorage.getItem('token');
+    const user = localStorage.getItem('user');
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Logout complete. Token cleared:', !token);
+      console.log('User cleared:', !user);
+    }
+    
     dispatch({ type: 'LOGOUT' });
   };
 
@@ -254,6 +352,41 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
     }
   };
 
+  const updateProfile = async (userData: any): Promise<{ success: boolean; message?: string; error?: string }> => {
+    try {
+      const response = await api.updateProfile(userData);
+      
+      if (response.message === 'success') {
+        // Update user in state and localStorage
+        const updatedUser = { ...state.user, ...response.data };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        
+        dispatch({
+          type: 'LOGIN_SUCCESS',
+          payload: {
+            token: state.token!,
+            user: updatedUser,
+          },
+        });
+        
+        return { success: true, message: response.message };
+      } else {
+        throw new Error(response.message || 'Profile update failed');
+      }
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : 'Failed to update profile' };
+    }
+  };
+
+  const changePassword = async (passwordData: any): Promise<{ success: boolean; message?: string; error?: string }> => {
+    try {
+      const response = await api.changePassword(passwordData);
+      return { success: true, message: response.message };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : 'Failed to change password' };
+    }
+  };
+
   const value: AuthContextType = {
     ...state,
     login,
@@ -263,6 +396,8 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
     forgotPassword,
     verifyResetCode,
     resetPassword,
+    updateProfile,
+    changePassword,
   };
 
   return (

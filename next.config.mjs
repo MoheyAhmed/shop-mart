@@ -36,7 +36,20 @@ const nextConfig = {
         pathname: '/**',
       }
     ],
+    formats: ['image/webp', 'image/avif'],
   },
+  // Optimize for development
+  webpack: (config, { dev, isServer }) => {
+    if (dev && !isServer) {
+      config.watchOptions = {
+        poll: 1000,
+        aggregateTimeout: 300,
+      };
+    }
+    return config;
+  },
+  // Reduce bundle size
+  swcMinify: true,
 };
 
 export default nextConfig;

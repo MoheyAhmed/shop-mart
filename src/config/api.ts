@@ -94,15 +94,39 @@ export const API_ENDPOINTS: ApiEndpoints = {
 // API Helper Functions
 export const apiRequest = async <T>(
   url: string, 
-  options: ApiRequestOptions = {}
+  options: ApiRequestOptions = {},
+  requireAuth: boolean = true
 ): Promise<T> => {
   const token = localStorage.getItem('token');
+  
+  // Check if token is expired
+  if (requireAuth && token) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const now = Math.floor(Date.now() / 1000);
+      if (payload.exp && payload.exp < now) {
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Token expired, clearing localStorage');
+        }
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        throw new Error('Token expired. Please log in again.');
+      }
+    } catch (error) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Invalid token format, clearing localStorage');
+      }
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      throw new Error('Invalid token. Please log in again.');
+    }
+  }
   
   const defaultOptions: ApiRequestOptions = {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
+      ...(requireAuth && token && { token: token }),
     },
   };
 
@@ -116,11 +140,27 @@ export const apiRequest = async <T>(
   };
 
   try {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Making API request to:', url);
+      console.log('Request config:', config);
+      console.log('Token from localStorage:', localStorage.getItem('token'));
+      console.log('Headers being sent:', config.headers);
+      console.log('Token header:', config.headers?.token);
+    }
+    
     const response = await fetch(url, config);
     
     if (!response.ok) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Response not ok:', response.status, response.statusText);
+        console.log('Response headers:', response.headers);
+      }
+      
       // Handle specific error cases
       if (response.status === 401) {
+        if (process.env.NODE_ENV === 'development') {
+          console.log('401 Unauthorized - clearing token and user');
+        }
         // Clear invalid token
         localStorage.removeItem('token');
         localStorage.removeItem('user');
@@ -130,6 +170,9 @@ export const apiRequest = async <T>(
     }
     
     const data = await response.json();
+    if (process.env.NODE_ENV === 'development') {
+      console.log('API response:', data);
+    }
     return data;
   } catch (error) {
     console.error('API request failed:', error);
@@ -140,13 +183,8 @@ export const apiRequest = async <T>(
 // API Health Check
 export const checkApiHealth = async (): Promise<boolean> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/v1/categories`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    return response.ok;
+    await apiRequest(`${API_BASE_URL}/api/v1/categories`, {}, false);
+    return true;
   } catch (error) {
     return false;
   }
@@ -214,63 +252,93 @@ export const api = {
   getCategorySubCategories: (categoryId: string) => apiRequest(API_ENDPOINTS.CATEGORIES.SUBCATEGORIES(categoryId)),
   
   // Cart
-  getCart: () => apiRequest(API_ENDPOINTS.CART.ALL),
+  getCart: () => apiRequest(API_ENDPOINTS.CART.ALL, {}, true),
   
   addToCart: (productId: string) => apiRequest(API_ENDPOINTS.CART.ADD, {
     method: 'POST',
     body: JSON.stringify({ productId }),
-  }),
+  }, true),
   
   updateCartItem: (id: string, count: number) => apiRequest(API_ENDPOINTS.CART.UPDATE(id), {
     method: 'PUT',
-    body: JSON.stringify({ count }),
-  }),
+    body: JSON.stringify({ count: String(count) }),
+  }, true),
   
   removeFromCart: (id: string) => apiRequest(API_ENDPOINTS.CART.REMOVE(id), {
     method: 'DELETE',
-  }),
+  }, true),
   
   clearCart: () => apiRequest(API_ENDPOINTS.CART.CLEAR, {
     method: 'DELETE',
-  }),
+  }, true),
   
   // Wishlist
-  getWishlist: () => apiRequest(API_ENDPOINTS.WISHLIST.ALL),
+  getWishlist: () => apiRequest(API_ENDPOINTS.WISHLIST.ALL, {}, true),
   
   addToWishlist: (productId: string) => apiRequest(API_ENDPOINTS.WISHLIST.ADD, {
     method: 'POST',
     body: JSON.stringify({ productId }),
-  }),
+  }, true),
   
   removeFromWishlist: (id: string) => apiRequest(API_ENDPOINTS.WISHLIST.REMOVE(id), {
     method: 'DELETE',
-  }),
+  }, true),
   
   // Authentication
   signup: (userData: any) => apiRequest(API_ENDPOINTS.AUTH.SIGNUP, {
     method: 'POST',
     body: JSON.stringify(userData),
-  }),
+  }, false),
   
   signin: (credentials: any) => apiRequest(API_ENDPOINTS.AUTH.SIGNIN, {
     method: 'POST',
     body: JSON.stringify(credentials),
-  }),
+  }, false),
   
   forgotPassword: (email: string) => apiRequest(API_ENDPOINTS.AUTH.FORGOT_PASSWORD, {
     method: 'POST',
     body: JSON.stringify({ email }),
-  }),
+  }, false),
   
   verifyResetCode: (resetCode: string) => apiRequest(API_ENDPOINTS.AUTH.VERIFY_RESET_CODE, {
     method: 'POST',
     body: JSON.stringify({ resetCode }),
-  }),
+  }, false),
   
   resetPassword: (email: string, newPassword: string) => apiRequest(API_ENDPOINTS.AUTH.RESET_PASSWORD, {
     method: 'PUT',
     body: JSON.stringify({ email, newPassword }),
-  }),
+  }, false),
   
-  verifyToken: () => apiRequest(API_ENDPOINTS.AUTH.VERIFY_TOKEN),
+  verifyToken: () => apiRequest(API_ENDPOINTS.AUTH.VERIFY_TOKEN, {}, true),
+  
+  // User Management
+  updateProfile: (userData: any) => apiRequest(API_ENDPOINTS.USERS.UPDATE_ME, {
+    method: 'PUT',
+    body: JSON.stringify(userData),
+  }, true),
+  
+  changePassword: (passwordData: any) => apiRequest(API_ENDPOINTS.USERS.CHANGE_PASSWORD, {
+    method: 'PUT',
+    body: JSON.stringify(passwordData),
+  }, true),
+  
+  // Orders
+  getAllOrders: () => apiRequest(API_ENDPOINTS.ORDERS.ALL, {}, true),
+  
+  getUserOrders: (userId: string) => apiRequest(API_ENDPOINTS.ORDERS.USER_ORDERS(userId), {}, true),
+  
+  createCashOrder: (cartId: string, shippingAddress: any) => apiRequest(API_ENDPOINTS.ORDERS.CREATE_CASH(cartId), {
+    method: 'POST',
+    body: JSON.stringify({ shippingAddress }),
+  }, true),
+  
+  createCheckoutSession: (cartId: string, shippingAddress: any, url: string = 'http://localhost:3000') => {
+    const queryParams = new URLSearchParams({ url }).toString();
+    const endpoint = `${API_ENDPOINTS.ORDERS.CHECKOUT_SESSION(cartId)}?${queryParams}`;
+    return apiRequest(endpoint, {
+      method: 'POST',
+      body: JSON.stringify({ shippingAddress }),
+    }, true);
+  },
 };

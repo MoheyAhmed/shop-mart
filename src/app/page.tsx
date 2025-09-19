@@ -5,10 +5,12 @@ import ProductCard from '@/components/ProductCard';
 import Link from 'next/link';
 import { api, checkApiHealth } from '@/config/api';
 import { Product } from '@/types/api';
+import { useAuth } from '@/context/AuthContext';
 
 export default function Home(): JSX.Element {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const { isAuthenticated, user } = useAuth();
 
   useEffect(() => {
     // Fetch featured products from API
@@ -341,6 +343,52 @@ export default function Home(): JSX.Element {
           </div>
         </div>
       </section>
+
+      {/* Welcome Message */}
+      {isAuthenticated && user && (
+        <section className="bg-green-50 py-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-green-800 mb-2">
+                Welcome back, {user.name}! 👋
+              </h2>
+              <p className="text-green-600">
+                You're logged in and ready to shop. Add items to your cart and checkout when you're ready!
+              </p>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Not Logged In Message */}
+      {!isAuthenticated && (
+        <section className="bg-yellow-50 py-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-yellow-800 mb-2">
+                Ready to start shopping? 🛒
+              </h2>
+              <p className="text-yellow-600 mb-4">
+                Please log in to add items to your cart and complete your purchase.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link 
+                  href="/login"
+                  className="bg-yellow-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-yellow-700 transition-colors"
+                >
+                  Login
+                </Link>
+                <Link 
+                  href="/register"
+                  className="border-2 border-yellow-600 text-yellow-600 px-6 py-2 rounded-lg font-semibold hover:bg-yellow-600 hover:text-white transition-colors"
+                >
+                  Create Account
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Featured Products Section */}
       <section className="py-16">

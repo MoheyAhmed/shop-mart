@@ -49,6 +49,45 @@ export interface SubCategory {
 export type BrandsResponse = ApiResponse<Brand>;
 export type SubCategoriesResponse = ApiResponse<SubCategory>;
 
+// Order Types
+export interface ShippingAddress {
+  details: string;
+  phone: string;
+  city: string;
+}
+
+export interface OrderItem {
+  _id: string;
+  count: number;
+  price: number;
+  product: Product;
+}
+
+export interface Order {
+  _id: string;
+  shippingAddress?: ShippingAddress;
+  taxPrice: number;
+  shippingPrice: number;
+  totalOrderPrice: number;
+  paymentMethodType: 'cash' | 'card';
+  isPaid: boolean;
+  isDelivered: boolean;
+  user: {
+    _id: string;
+    name: string;
+    email: string;
+    phone: string;
+  };
+  cartItems: OrderItem[];
+  paidAt?: string;
+  createdAt: string;
+  updatedAt: string;
+  id: number;
+  __v: number;
+}
+
+export type OrdersResponse = ApiResponse<Order>;
+
 // Product Types
 export interface Subcategory {
   _id: string;

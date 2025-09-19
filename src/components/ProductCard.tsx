@@ -1,13 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { Product } from '@/types/api';
+import { useAuth } from '@/context/AuthContext';
+import { useCart } from '@/context/CartContext';
 
 interface ProductCardProps {
   product: Product;
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
+  const [isAdding, setIsAdding] = useState(false);
+  const { isAuthenticated, loading } = useAuth();
+  const { addToCart } = useCart();
+  const router = useRouter();
+
   const formatPrice = (price: number): string => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -54,9 +62,71 @@ export default function ProductCard({ product }: ProductCardProps) {
     return <div className="flex">{stars}</div>;
   };
 
-  const discountPercentage = product.priceAfterDiscount 
+  const discountPercentage = product.priceAfterDiscount
     ? Math.round(((product.price - product.priceAfterDiscount) / product.price) * 100)
     : 0;
+
+  const handleAddToCart = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Check both isAuthenticated state and localStorage token
+    const token = localStorage.getItem('token');
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.log('ProductCard - isAuthenticated:', isAuthenticated);
+      console.log('ProductCard - loading:', loading);
+      console.log('ProductCard - token:', token);
+    }
+    
+    // If still loading, don't do anything
+    if (loading) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('ProductCard - Still loading, waiting...');
+      }
+      return;
+    }
+    
+    // If not authenticated or no token, redirect to login
+    if (!isAuthenticated || !token) {
+      // Redirect to login page with current path as redirect parameter
+      const currentPath = window.location.pathname;
+      if (process.env.NODE_ENV === 'development') {
+        console.log('ProductCard - Redirecting to login, current path:', currentPath);
+        console.log('ProductCard - Reason: isAuthenticated =', isAuthenticated, ', token =', token);
+      }
+      router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
+      return;
+    }
+
+    if (product.quantity === 0) {
+      alert('This product is out of stock');
+      return;
+    }
+
+    setIsAdding(true);
+    try {
+      const result = await addToCart(product);
+      
+      if (result.success) {
+        // Show success message
+        alert('Product added to cart successfully!');
+      } else {
+        // If authentication error, redirect to login
+        if (result.error && result.error.includes('Authentication required')) {
+          const currentPath = window.location.pathname;
+          router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
+        } else {
+          alert(result.error || 'Failed to add to cart');
+        }
+      }
+    } catch (error) {
+      console.error('Add to cart error:', error);
+      alert('Failed to add to cart. Please try again.');
+    } finally {
+      setIsAdding(false);
+    }
+  };
 
   return (
     <Link href={`/products/${product._id}`} className="group h-full">
@@ -141,10 +211,11 @@ export default function ProductCard({ product }: ProductCardProps) {
 
           {/* Add to Cart Button */}
           <button 
+            onClick={handleAddToCart}
             className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-auto"
-            disabled={product.quantity === 0}
+            disabled={product.quantity === 0 || isAdding || loading}
           >
-            {product.quantity > 0 ? 'Add to Cart' : 'Out of Stock'}
+            {loading ? 'Loading...' : isAdding ? 'Adding...' : product.quantity > 0 ? 'Add to Cart' : 'Out of Stock'}
           </button>
         </div>
       </div>

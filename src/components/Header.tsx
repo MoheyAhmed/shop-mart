@@ -3,10 +3,12 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
 
 export default function Header(): JSX.Element {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const { getTotalItems } = useCart();
+  const { isAuthenticated, user, logout } = useAuth();
 
   return (
     <header className="bg-white shadow-md sticky top-0 z-50">
@@ -35,21 +37,6 @@ export default function Header(): JSX.Element {
             </Link>
           </nav>
 
-          {/* Search Bar */}
-          <div className="hidden md:flex flex-1 max-w-lg mx-8">
-            <div className="relative w-full">
-              <input
-                type="text"
-                placeholder="Search products..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-              <button className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </button>
-            </div>
-          </div>
 
           {/* Cart and User Actions */}
           <div className="flex items-center space-x-4">
@@ -62,11 +49,35 @@ export default function Header(): JSX.Element {
               </span>
             </Link>
             
-            <Link href="/login" className="text-gray-700 hover:text-blue-600">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-            </Link>
+            {isAuthenticated ? (
+              <div className="flex items-center space-x-4">
+                <Link href="/orders" className="text-gray-700 hover:text-blue-600 text-sm">
+                  Orders
+                </Link>
+                <span className="text-sm text-gray-700">Welcome, {user?.name}</span>
+                <button
+                  onClick={logout}
+                  className="text-gray-700 hover:text-blue-600 text-sm"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-2">
+                <Link
+                  href="/login"
+                  className="text-gray-700 hover:text-blue-600 text-sm"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/register"
+                  className="bg-blue-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-blue-700"
+                >
+                  Sign Up
+                </Link>
+              </div>
+            )}
 
             {/* Mobile menu button */}
             <button
@@ -97,14 +108,17 @@ export default function Header(): JSX.Element {
                 Brands
               </Link>
               
-              {/* Mobile Search */}
-              <div className="px-3 py-2">
-                <input
-                  type="text"
-                  placeholder="Search products..."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
+              {/* Mobile Auth Links */}
+              {!isAuthenticated && (
+                <>
+                  <Link href="/login" className="text-gray-700 hover:text-blue-600 block px-3 py-2 text-base font-medium">
+                    Login
+                  </Link>
+                  <Link href="/register" className="text-gray-700 hover:text-blue-600 block px-3 py-2 text-base font-medium">
+                    Sign Up
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         )}
