@@ -88,6 +88,10 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
       };
 
     case 'CLEAR_CART_SUCCESS':
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Reducer - CLEAR_CART_SUCCESS case executed');
+        console.log('Reducer - Previous state:', state);
+      }
       return {
         ...state,
         items: [],
@@ -124,6 +128,17 @@ export const CartProvider = ({ children }: CartProviderProps) => {
       quantity: Number(cartItem.product.quantity),
       ratingsAverage: Number(cartItem.product.ratingsAverage),
       priceAfterDiscount: Number(cartItem.product.priceAfterDiscount || cartItem.price),
+      product: {
+        _id: cartItem.product._id,
+        title: cartItem.product.title,
+        imageCover: cartItem.product.imageCover,
+        brand: cartItem.product.brand,
+        category: cartItem.product.category,
+        quantity: Number(cartItem.product.quantity),
+        ratingsAverage: Number(cartItem.product.ratingsAverage),
+        priceAfterDiscount: Number(cartItem.product.priceAfterDiscount || cartItem.price),
+        id: cartItem.product.id,
+      },
     }));
   };
 
@@ -139,8 +154,16 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     dispatch({ type: 'SET_LOADING', payload: true });
     try {
       const response = await api.getCart();
+      if (process.env.NODE_ENV === 'development') {
+        console.log('loadCart - Full response:', response);
+        console.log('loadCart - Data:', (response as any).data);
+        console.log('loadCart - Products:', (response as any).data?.products);
+      }
       if ((response as any).status === 'success') {
-        const cartItems = transformCartItems((response as any).data.products);
+        const cartItems = transformCartItems((response as any).data.products || []);
+        if (process.env.NODE_ENV === 'development') {
+          console.log('loadCart - Transformed items:', cartItems);
+        }
         dispatch({ type: 'LOAD_CART_SUCCESS', payload: cartItems });
       }
     } catch (error) {
@@ -156,19 +179,11 @@ export const CartProvider = ({ children }: CartProviderProps) => {
   const addToCart = async (product: Product): Promise<{ success: boolean; error?: string }> => {
     dispatch({ type: 'SET_LOADING', payload: true });
     try {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('Adding to cart, product ID:', product._id);
-        console.log('Token in localStorage:', localStorage.getItem('token'));
-      }
-      
       const response = await api.addToCart(product._id);
-      if (process.env.NODE_ENV === 'development') {
-        console.log('Add to cart response:', response);
-      }
       
       if ((response as any).status === 'success') {
-        const cartItems = transformCartItems((response as any).data.products);
-        dispatch({ type: 'ADD_TO_CART_SUCCESS', payload: cartItems });
+        // After adding to cart, reload the cart to get the updated data
+        await loadCart();
         return { success: true };
       } else {
         throw new Error((response as any).message || 'Failed to add to cart');
@@ -188,13 +203,20 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     }
   };
 
-  const removeFromCart = async (productId: string): Promise<{ success: boolean; error?: string }> => {
+  const removeFromCart = async (cartItemId: string): Promise<{ success: boolean; error?: string }> => {
+    // Find the cart item to get the product ID
+    const cartItem = state.items.find(item => item._id === cartItemId);
+    if (!cartItem) {
+      return { success: false, error: 'Item not found in cart' };
+    }
+    
     dispatch({ type: 'SET_LOADING', payload: true });
     try {
-      const response = await api.removeFromCart(productId);
+      // Use the product ID from the cart item
+      const response = await api.removeFromCart(cartItem.product._id);
       if ((response as any).status === 'success') {
-        const cartItems = transformCartItems((response as any).data.products);
-        dispatch({ type: 'REMOVE_FROM_CART_SUCCESS', payload: cartItems });
+        // After removing from cart, reload the cart to get the updated data
+        await loadCart();
         return { success: true };
       } else {
         throw new Error((response as any).message || 'Failed to remove from cart');
@@ -213,17 +235,25 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     }
   };
 
-  const updateQuantity = async (productId: string, quantity: number): Promise<{ success: boolean; error?: string }> => {
+  const updateQuantity = async (cartItemId: string, quantity: number): Promise<{ success: boolean; error?: string }> => {
     if (quantity <= 0) {
-      return removeFromCart(productId);
+      return removeFromCart(cartItemId);
     }
+    
+    // Find the cart item to get the product ID
+    const cartItem = state.items.find(item => item._id === cartItemId);
+    if (!cartItem) {
+      return { success: false, error: 'Item not found in cart' };
+    }
+    
     
     dispatch({ type: 'SET_LOADING', payload: true });
     try {
-      const response = await api.updateCartItem(productId, quantity);
+      // Use the product ID from the cart item
+      const response = await api.updateCartItem(cartItem.product._id, quantity);
       if ((response as any).status === 'success') {
-        const cartItems = transformCartItems((response as any).data.products);
-        dispatch({ type: 'UPDATE_QUANTITY_SUCCESS', payload: cartItems });
+        // After updating quantity, reload the cart to get the updated data
+        await loadCart();
         return { success: true };
       } else {
         throw new Error((response as any).message || 'Failed to update quantity');
@@ -246,8 +276,19 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     dispatch({ type: 'SET_LOADING', payload: true });
     try {
       const response = await api.clearCart();
-      if ((response as any).status === 'success') {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('clearCart - API response:', response);
+      }
+      if ((response as any).status === 'success' || (response as any).message === 'success') {
+        if (process.env.NODE_ENV === 'development') {
+          console.log('clearCart - Clearing cart state directly');
+          console.log('clearCart - Current state before dispatch:', state);
+        }
+        // Clear the cart state directly since the API call was successful
         dispatch({ type: 'CLEAR_CART_SUCCESS' });
+        if (process.env.NODE_ENV === 'development') {
+          console.log('clearCart - Dispatch completed');
+        }
         return { success: true };
       } else {
         throw new Error((response as any).message || 'Failed to clear cart');
