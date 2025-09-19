@@ -61,7 +61,12 @@ export default function CartPage() {
     }
     
     if (!currentCartId) {
-      alert('Cart not found. Please try again.');
+      alert('Cart is empty. Please add some products first.');
+      return;
+    }
+    
+    if (items.length === 0) {
+      alert('Cart is empty. Please add some products first.');
       return;
     }
 

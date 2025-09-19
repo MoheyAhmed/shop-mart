@@ -51,7 +51,7 @@ export default function Header(): JSX.Element {
             
             {isAuthenticated ? (
               <div className="flex items-center space-x-4">
-                <Link href="/orders" className="text-gray-700 hover:text-blue-600 text-sm">
+                <Link href="/allorders" className="text-gray-700 hover:text-blue-600 text-sm">
                   Orders
                 </Link>
                 <span className="text-sm text-gray-700">Welcome, {user?.name}</span>

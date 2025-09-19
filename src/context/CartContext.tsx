@@ -168,34 +168,55 @@ export const CartProvider = ({ children }: CartProviderProps) => {
       if (process.env.NODE_ENV === 'development') {
         console.log('loadCart - API response received:', response);
       }
-      if ((response as any).status === 'success') {
-        const cartItems = transformCartItems((response as any).data.products || []);
-        const cartId = (response as any).data?._id || (response as any).cartId;
-        if (process.env.NODE_ENV === 'development') {
-          console.log('loadCart - Cart ID from response:', cartId);
-          console.log('loadCart - Data object:', (response as any).data);
-          console.log('loadCart - About to dispatch LOAD_CART_SUCCESS');
+        if ((response as any).status === 'success') {
+          const cartItems = transformCartItems((response as any).data.products || []);
+          const cartId = (response as any).data?._id || (response as any).cartId;
+          const cartOwner = (response as any).data?.cartOwner;
+          
+          if (process.env.NODE_ENV === 'development') {
+            console.log('loadCart - Cart ID from response:', cartId);
+            console.log('loadCart - Cart Owner from response:', cartOwner);
+            console.log('loadCart - Data object:', (response as any).data);
+            console.log('loadCart - About to dispatch LOAD_CART_SUCCESS');
+          }
+          
+          dispatch({ type: 'LOAD_CART_SUCCESS', payload: { items: cartItems, cartId } });
+          
+          // Store cartId and cartOwner in localStorage only if they exist
+          if (cartId) {
+            localStorage.setItem('cartId', cartId);
+            if (process.env.NODE_ENV === 'development') {
+              console.log('loadCart - Stored cartId in localStorage:', cartId);
+            }
+          } else {
+            // If no cartId, remove it from localStorage
+            localStorage.removeItem('cartId');
+            if (process.env.NODE_ENV === 'development') {
+              console.log('loadCart - No cartId found, removed from localStorage');
+            }
+          }
+          
+          if (cartOwner) {
+            localStorage.setItem('cartOwner', cartOwner);
+            if (process.env.NODE_ENV === 'development') {
+              console.log('loadCart - Stored cartOwner in localStorage:', cartOwner);
+            }
+          } else {
+            // If no cartOwner, remove it from localStorage
+            localStorage.removeItem('cartOwner');
+            if (process.env.NODE_ENV === 'development') {
+              console.log('loadCart - No cartOwner found, removed from localStorage');
+            }
+          }
+          
+          if (process.env.NODE_ENV === 'development') {
+            console.log('loadCart - Dispatch completed');
+          }
+        } else {
+          if (process.env.NODE_ENV === 'development') {
+            console.log('loadCart - Response status is not success:', (response as any).status);
+          }
         }
-        dispatch({ type: 'LOAD_CART_SUCCESS', payload: { items: cartItems, cartId } });
-        
-        // Store cartId and cartOwner in localStorage
-        if (cartId) {
-          localStorage.setItem('cartId', cartId);
-        }
-        if ((response as any).data?.cartOwner) {
-          localStorage.setItem('cartOwner', (response as any).data.cartOwner);
-        }
-        
-        if (process.env.NODE_ENV === 'development') {
-          console.log('loadCart - Dispatch completed');
-          console.log('loadCart - Stored cartId in localStorage:', cartId);
-          console.log('loadCart - Stored cartOwner in localStorage:', (response as any).data?.cartOwner);
-        }
-      } else {
-        if (process.env.NODE_ENV === 'development') {
-          console.log('loadCart - Response status is not success:', (response as any).status);
-        }
-      }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
         console.log('loadCart - Error occurred:', error);
@@ -214,6 +235,10 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     try {
       const response = await api.addToCart(product._id);
       
+      if (process.env.NODE_ENV === 'development') {
+        console.log('addToCart - API response:', response);
+      }
+      
       if ((response as any).status === 'success') {
         // After adding to cart, reload the cart to get the updated data
         await loadCart();
@@ -227,7 +252,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
       
       // If authentication error, clear the cart state
       if (errorMessage.includes('Authentication required')) {
-        dispatch({ type: 'LOAD_CART_SUCCESS', payload: [] });
+        dispatch({ type: 'LOAD_CART_SUCCESS', payload: { items: [], cartId: null } });
       } else {
         dispatch({ type: 'SET_ERROR', payload: errorMessage });
       }

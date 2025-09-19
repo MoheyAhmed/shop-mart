@@ -215,9 +215,14 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
           console.log('User to store:', user);
         }
         
+        // Extract user ID from token
+        const tokenPayload = JSON.parse(atob(token.split('.')[1]));
+        const userId = tokenPayload.id;
+        
         // Store in localStorage
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(user));
+        localStorage.setItem('userId', userId);
         
         // Verify storage immediately
         const storedToken = localStorage.getItem('token');
