@@ -68,21 +68,21 @@ export default function AllOrdersPage() {
     console.log('AllOrdersPage - authLoading:', authLoading);
   }
 
-  useEffect(() => {
-    const fetchOrders = async () => {
-      // Get user ID from localStorage (cartOwner)
-      const userId = localStorage.getItem('cartOwner');
-      
-      if (!userId) {
-        if (process.env.NODE_ENV === 'development') {
-          console.log('No cartOwner found in localStorage, cannot fetch orders');
-        }
-        setLoading(false);
-        return;
-      }
+      useEffect(() => {
+        const fetchOrders = async () => {
+          // Get user ID from localStorage (userId from JWT token)
+          const userId = localStorage.getItem('userId');
+          
+          if (!userId) {
+            if (process.env.NODE_ENV === 'development') {
+              console.log('No userId found in localStorage, cannot fetch orders');
+            }
+            setLoading(false);
+            return;
+          }
       
       if (process.env.NODE_ENV === 'development') {
-        console.log('Fetching orders for cartOwner (userId):', userId);
+        console.log('Fetching orders for userId:', userId);
       }
       
       setLoading(true);

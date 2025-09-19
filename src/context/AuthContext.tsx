@@ -2,6 +2,16 @@
 
 import { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
 import { api } from '@/config/api';
+import { jwtDecode } from 'jwt-decode';
+
+// JWT Payload Type
+interface JWTPayload {
+  id: string;
+  name: string;
+  role: string;
+  iat: number;
+  exp: number;
+}
 
 // User Type
 interface User {
@@ -151,6 +161,22 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
         if (process.env.NODE_ENV === 'development') {
           console.log('Token verified successfully');
         }
+        
+        // Extract user ID from token and store it
+        try {
+          const tokenPayload = jwtDecode<JWTPayload>(token);
+          const userId = tokenPayload.id;
+          localStorage.setItem('userId', userId);
+          
+          if (process.env.NODE_ENV === 'development') {
+            console.log('Stored userId from token:', userId);
+          }
+        } catch (error) {
+          if (process.env.NODE_ENV === 'development') {
+            console.log('Failed to decode token:', error);
+          }
+        }
+        
         dispatch({
           type: 'LOGIN_SUCCESS',
           payload: {
@@ -166,6 +192,7 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
         // Token is invalid, clear storage
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        localStorage.removeItem('userId');
         dispatch({ type: 'LOGOUT' });
       })
       .finally(() => {
@@ -215,8 +242,8 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
           console.log('User to store:', user);
         }
         
-        // Extract user ID from token
-        const tokenPayload = JSON.parse(atob(token.split('.')[1]));
+        // Extract user ID from token using jwtDecode
+        const tokenPayload = jwtDecode<JWTPayload>(token);
         const userId = tokenPayload.id;
         
         // Store in localStorage
@@ -272,9 +299,14 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
           console.log('User to store:', user);
         }
         
+        // Extract user ID from token using jwtDecode
+        const tokenPayload = jwtDecode<JWTPayload>(token);
+        const userId = tokenPayload.id;
+        
         // Store in localStorage
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(user));
+        localStorage.setItem('userId', userId);
         
         // Verify storage immediately
         const storedToken = localStorage.getItem('token');
@@ -313,6 +345,7 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
     
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('userId');
     
     // Verify cleanup
     const token = localStorage.getItem('token');

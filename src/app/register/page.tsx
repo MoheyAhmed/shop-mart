@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -32,7 +33,7 @@ export default function RegisterPage() {
     clearError();
 
     if (formData.password !== formData.rePassword) {
-      alert('Passwords do not match');
+      toast.error('Passwords do not match');
       setIsLoading(false);
       return;
     }

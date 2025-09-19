@@ -1,17 +1,21 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { api } from '@/config/api';
 import { Product } from '@/types/api';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
+import toast from 'react-hot-toast';
 
 export default function ProductDetailPage(): JSX.Element {
   const params = useParams();
+  const router = useRouter();
   const productId = params.id as string;
   const { addToCart } = useCart();
+  const { isAuthenticated } = useAuth();
   
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -46,17 +50,39 @@ export default function ProductDetailPage(): JSX.Element {
   const handleAddToCart = async (): Promise<void> => {
     if (!product) return;
     
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      const currentPath = window.location.pathname;
+      toast.error('Please login to add products to cart');
+      router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
+      return;
+    }
+    
+    if (product.quantity === 0) {
+      toast.error('This product is out of stock');
+      return;
+    }
+    
     setAddingToCart(true);
     try {
       const result = await addToCart(product);
       if (result.success) {
-        // Show success message or notification
-        console.log('Product added to cart successfully');
+        toast.success('Product added to cart successfully!', {
+          icon: '🛒',
+          duration: 2000,
+        });
       } else {
-        console.error('Failed to add to cart:', result.error);
+        // If authentication error, redirect to login
+        if (result.error && result.error.includes('Authentication required')) {
+          const currentPath = window.location.pathname;
+          router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
+        } else {
+          toast.error(result.error || 'Failed to add to cart');
+        }
       }
     } catch (error) {
       console.error('Error adding to cart:', error);
+      toast.error('Failed to add to cart. Please try again.');
     } finally {
       setAddingToCart(false);
     }

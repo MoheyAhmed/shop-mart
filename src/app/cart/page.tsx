@@ -7,6 +7,7 @@ import { api } from '@/config/api';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Link from 'next/link';
 import Image from 'next/image';
+import toast from 'react-hot-toast';
 
 export default function CartPage() {
   const { items, loading, error, removeFromCart, updateQuantity, clearCart, cartId } = useCart();
@@ -60,15 +61,15 @@ export default function CartPage() {
       console.log('handleCheckout - items:', items);
     }
     
-    if (!currentCartId) {
-      alert('Cart is empty. Please add some products first.');
-      return;
-    }
-    
-    if (items.length === 0) {
-      alert('Cart is empty. Please add some products first.');
-      return;
-    }
+        if (!currentCartId) {
+          toast.error('Cart is empty. Please add some products first.');
+          return;
+        }
+        
+        if (items.length === 0) {
+          toast.error('Cart is empty. Please add some products first.');
+          return;
+        }
 
     setCheckoutLoading(true);
     try {
@@ -80,11 +81,14 @@ export default function CartPage() {
         }
         
         if ((response as any).status === 'success') {
-          alert('Order created successfully!');
+          toast.success('Order created successfully!', {
+            icon: '✅',
+            duration: 3000,
+          });
           clearCart();
           setShowCheckout(false);
         } else {
-          alert('Failed to create order');
+          toast.error('Failed to create order');
         }
       } else {
         // Create checkout session for card payment
@@ -97,12 +101,12 @@ export default function CartPage() {
           // Redirect to payment page
           window.location.href = (response as any).session.url;
         } else {
-          alert('Failed to create checkout session');
+          toast.error('Failed to create checkout session');
         }
       }
     } catch (error) {
       console.error('Checkout error:', error);
-      alert('Checkout failed. Please try again.');
+      toast.error('Checkout failed. Please try again.');
     } finally {
       setCheckoutLoading(false);
     }

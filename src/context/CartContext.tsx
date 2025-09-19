@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
 import { api } from '@/config/api';
+import toast from 'react-hot-toast';
 import { Product } from '@/types/api';
 
 // Cart Item Type

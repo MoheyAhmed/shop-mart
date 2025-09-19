@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Product } from '@/types/api';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
+import toast from 'react-hot-toast';
 
 interface ProductCardProps {
   product: Product;
@@ -100,7 +101,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     }
 
     if (product.quantity === 0) {
-      alert('This product is out of stock');
+      toast.error('This product is out of stock');
       return;
     }
 
@@ -110,19 +111,22 @@ export default function ProductCard({ product }: ProductCardProps) {
       
       if (result.success) {
         // Show success message
-        alert('Product added to cart successfully!');
+        toast.success('Product added to cart successfully!', {
+          icon: '🛒',
+          duration: 2000,
+        });
       } else {
         // If authentication error, redirect to login
         if (result.error && result.error.includes('Authentication required')) {
           const currentPath = window.location.pathname;
           router.push(`/login?redirect=${encodeURIComponent(currentPath)}`);
         } else {
-          alert(result.error || 'Failed to add to cart');
+          toast.error(result.error || 'Failed to add to cart');
         }
       }
     } catch (error) {
       console.error('Add to cart error:', error);
-      alert('Failed to add to cart. Please try again.');
+      toast.error('Failed to add to cart. Please try again.');
     } finally {
       setIsAdding(false);
     }
