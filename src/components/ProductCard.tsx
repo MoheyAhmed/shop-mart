@@ -130,7 +130,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Link href={`/products/${product._id}`} className="group h-full">
-      <div className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden h-full flex flex-col">
+      <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden h-full flex flex-col border border-white/20">
         {/* Product Image */}
         <div className="relative overflow-hidden">
           <div className="aspect-w-1 aspect-h-1 w-full h-48">
@@ -138,7 +138,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               src={product.imageCover}
               alt={product.title}
               fill
-              className="object-cover group-hover:scale-105 transition-transform duration-300"
+              className="object-cover group-hover:scale-110 transition-transform duration-500"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
                 target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDMwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMDAgMTAwSDIwMFYyMDBIMTAwVjEwMFoiIHN0cm9rZT0iIzlDQTNBRiIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPHBhdGggZD0iTTEyMCAxMjBIMTgwVjE4MEgxMjBWMTIwWiIgc3Ryb2tlPSIjOUNBM0FGIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4K';
@@ -148,52 +148,52 @@ export default function ProductCard({ product }: ProductCardProps) {
           
           {/* Discount Badge */}
           {discountPercentage > 0 && (
-            <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+            <div className="absolute top-3 left-3 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
               -{discountPercentage}%
             </div>
           )}
 
           {/* Wishlist Button */}
-          <button className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-red-50">
-            <svg className="w-5 h-5 text-gray-600 hover:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <button className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-red-50 hover:scale-110">
+            <svg className="w-5 h-5 text-gray-600 hover:text-red-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
             </svg>
           </button>
         </div>
 
         {/* Product Info */}
-        <div className="p-4 flex-1 flex flex-col">
+        <div className="p-6 flex-1 flex flex-col">
           {/* Category */}
-          <div className="text-xs text-blue-600 font-medium mb-1">
+          <div className="text-xs text-blue-600 font-semibold mb-2 bg-blue-50 px-2 py-1 rounded-full inline-block w-fit">
             {product.category.name}
           </div>
 
           {/* Product Title */}
-          <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
+          <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors leading-tight">
             {product.title}
           </h3>
 
           {/* Brand */}
-          <div className="text-sm text-gray-500 mb-2">
-            by {product.brand.name}
+          <div className="text-sm text-gray-500 mb-3 font-medium">
+            by <span className="text-gray-700 font-semibold">{product.brand.name}</span>
           </div>
 
           {/* Rating */}
-          <div className="flex items-center mb-3">
+          <div className="flex items-center mb-4">
             {renderStars(product.ratingsAverage)}
-            <span className="ml-2 text-sm text-gray-600">
+            <span className="ml-2 text-sm text-gray-600 font-medium">
               ({product.ratingsQuantity})
             </span>
           </div>
 
           {/* Price */}
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-2">
-              <span className="text-xl font-bold text-gray-900">
+              <span className="text-2xl font-bold text-gray-900">
                 {formatPrice(product.priceAfterDiscount || product.price)}
               </span>
               {product.priceAfterDiscount && (
-                <span className="text-sm text-gray-500 line-through">
+                <span className="text-sm text-gray-500 line-through font-medium">
                   {formatPrice(product.price)}
                 </span>
               )}
@@ -201,21 +201,50 @@ export default function ProductCard({ product }: ProductCardProps) {
           </div>
 
           {/* Stock Status */}
-          <div className="text-sm text-gray-600 mb-3">
+          <div className="text-sm mb-4">
             {product.quantity > 0 ? (
-              <span className="text-green-600">In Stock ({product.quantity} available)</span>
+              <span className="text-green-600 font-semibold bg-green-50 px-2 py-1 rounded-full">
+                ✓ In Stock ({product.quantity} available)
+              </span>
             ) : (
-              <span className="text-red-600">Out of Stock</span>
+              <span className="text-red-600 font-semibold bg-red-50 px-2 py-1 rounded-full">
+                ✗ Out of Stock
+              </span>
             )}
           </div>
 
           {/* Add to Cart Button */}
           <button 
             onClick={handleAddToCart}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-auto"
+            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-xl font-bold hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed mt-auto shadow-lg hover:shadow-xl transform hover:scale-105 disabled:transform-none"
             disabled={product.quantity === 0 || isAdding || loading}
           >
-            {loading ? 'Loading...' : isAdding ? 'Adding...' : product.quantity > 0 ? 'Add to Cart' : 'Out of Stock'}
+            {loading ? (
+              <div className="flex items-center justify-center">
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Loading...
+              </div>
+            ) : isAdding ? (
+              <div className="flex items-center justify-center">
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Adding...
+              </div>
+            ) : product.quantity > 0 ? (
+              <div className="flex items-center justify-center">
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13l2.5 5m6-5v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-6m8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v4.01" />
+                </svg>
+                Add to Cart
+              </div>
+            ) : (
+              'Out of Stock'
+            )}
           </button>
         </div>
       </div>

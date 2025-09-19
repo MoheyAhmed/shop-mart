@@ -280,29 +280,41 @@ export default function Home(): JSX.Element {
   }, []);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600"></div>
+        <div className="absolute inset-0 bg-black/10"></div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
           <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              Welcome to ShopMart
+            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
+              Welcome to <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-300">ShopMart</span>
             </h1>
-            <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">
-              Discover amazing products at unbeatable prices. Shop the latest trends in fashion, electronics, and more.
+            <p className="text-xl md:text-2xl text-blue-100 mb-10 max-w-4xl mx-auto leading-relaxed">
+              Discover amazing products at unbeatable prices. Shop the latest trends in fashion, electronics, and more with our premium collection.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-6 justify-center">
               <Link 
                 href="/products"
-                className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+                className="group bg-white text-blue-600 px-10 py-4 rounded-2xl font-bold text-lg hover:bg-gray-50 transition-all duration-300 shadow-2xl hover:shadow-3xl transform hover:scale-105"
               >
-                Shop Now
+                <span className="flex items-center justify-center">
+                  Shop Now
+                  <svg className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </span>
               </Link>
               <Link 
                 href="/categories"
-                className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors"
+                className="group border-2 border-white/30 text-white px-10 py-4 rounded-2xl font-bold text-lg hover:bg-white/10 hover:border-white/50 transition-all duration-300 backdrop-blur-sm"
               >
-                Browse Categories
+                <span className="flex items-center justify-center">
+                  Browse Categories
+                  <svg className="ml-2 w-5 h-5 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  </svg>
+                </span>
               </Link>
             </div>
           </div>
@@ -310,135 +322,82 @@ export default function Home(): JSX.Element {
       </section>
 
       {/* Features Section */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-20 bg-white/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-            <div className="text-center">
-              <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Why Choose ShopMart?</h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              We provide exceptional service and quality products to make your shopping experience unforgettable
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+            <div className="group text-center p-8 rounded-2xl bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
+              <div className="bg-gradient-to-r from-blue-500 to-indigo-600 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Free Shipping</h3>
-              <p className="text-gray-600">Free shipping on orders over $50</p>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">Free Shipping</h3>
+              <p className="text-gray-600 text-lg leading-relaxed">Free shipping on all orders over $50 with fast and secure delivery</p>
             </div>
-            <div className="text-center">
-              <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="group text-center p-8 rounded-2xl bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
+              <div className="bg-gradient-to-r from-green-500 to-emerald-600 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Quality Guarantee</h3>
-              <p className="text-gray-600">30-day money back guarantee</p>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">Quality Guarantee</h3>
+              <p className="text-gray-600 text-lg leading-relaxed">30-day money back guarantee on all products with full refund</p>
             </div>
-            <div className="text-center">
-              <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="group text-center p-8 rounded-2xl bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
+              <div className="bg-gradient-to-r from-purple-500 to-pink-600 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 2.25a9.75 9.75 0 100 19.5 9.75 9.75 0 000-19.5z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-2">24/7 Support</h3>
-              <p className="text-gray-600">Round the clock customer support</p>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">24/7 Support</h3>
+              <p className="text-gray-600 text-lg leading-relaxed">Round the clock customer support to help you with any questions</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Welcome Message */}
-      {isAuthenticated && user && (
-        <section className="bg-green-50 py-8">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-green-800 mb-2">
-                Welcome back, {user.name}! 👋
-              </h2>
-              <p className="text-green-600">
-                You're logged in and ready to shop. Add items to your cart and checkout when you're ready!
-              </p>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Not Logged In Message */}
-      {!isAuthenticated && (
-        <section className="bg-yellow-50 py-8">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-yellow-800 mb-2">
-                Ready to start shopping? 🛒
-              </h2>
-              <p className="text-yellow-600 mb-4">
-                Please log in to add items to your cart and complete your purchase.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link 
-                  href="/login"
-                  className="bg-yellow-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-yellow-700 transition-colors"
-                >
-                  Login
-                </Link>
-                <Link 
-                  href="/register"
-                  className="border-2 border-yellow-600 text-yellow-600 px-6 py-2 rounded-lg font-semibold hover:bg-yellow-600 hover:text-white transition-colors"
-                >
-                  Create Account
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
       {/* Featured Products Section */}
-      <section className="py-16">
+      <section className="py-20 bg-gradient-to-br from-slate-50 to-blue-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Featured Products</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Discover our handpicked selection of the best products at amazing prices
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-gray-900 mb-6">Featured Products</h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              Discover our handpicked selection of the best products at amazing prices, carefully curated just for you
             </p>
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 lg:gap-8">
               {[...Array(8)].map((_, i) => (
-                <div key={i} className="bg-gray-200 animate-pulse rounded-lg h-96"></div>
+                <div key={i} className="bg-white/60 backdrop-blur-sm rounded-2xl h-96 animate-pulse shadow-lg"></div>
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 lg:gap-8">
               {featuredProducts.map((product, index) => (
                 <ProductCard key={`product-${product._id}-${index}`} product={product} />
               ))}
             </div>
           )}
 
-          <div className="text-center mt-12">
+          <div className="text-center mt-16">
             <Link 
               href="/products"
-              className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+              className="group inline-flex items-center justify-center bg-white/90 backdrop-blur-sm text-gray-900 px-8 py-4 rounded-2xl font-bold text-lg hover:bg-white transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105 border border-white/20"
             >
-              View All Products
+              <span className="flex items-center justify-center">
+                View All Products
+                <svg className="ml-3 w-6 h-6 group-hover:translate-x-2 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </span>
             </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Newsletter Section */}
-      <section className="bg-blue-600 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold mb-4">Stay Updated</h2>
-          <p className="text-xl mb-8">Subscribe to our newsletter for the latest deals and updates</p>
-          <div className="max-w-md mx-auto flex gap-4">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="flex-1 px-4 py-3 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-white"
-            />
-            <button className="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
-              Subscribe
-            </button>
           </div>
         </div>
       </section>
